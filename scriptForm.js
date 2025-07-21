@@ -35,6 +35,16 @@ const todosEstadosBrasil = [
   "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
 ];
 
+function voltarParaHome() {
+  const principal = document.getElementById("pageHome");
+  const cadastro = document.getElementById("pageCad");
+
+  if (principal && cadastro) {
+    cadastro.classList.add("hidden");
+    principal.classList.remove("hidden");
+  }
+}
+
 function carregarEstadosDisponiveis() {
   const cadastrados = dadosBrasil.estados.map(e => e.nome);
   const disponiveis = todosEstadosBrasil.filter(nome => !cadastrados.includes(nome));
@@ -440,4 +450,3 @@ btnResetarFormulario.addEventListener("click", () => {
   enderecoContainer.classList.add("hidden");
 
 });
-

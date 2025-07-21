@@ -4,6 +4,16 @@ const containerVendedores = document.getElementById("vendedorContainer");
 
 let arquivosSelecionados = [];
 
+function irParaCadastro() {
+  const principal = document.getElementById("pageHome");
+  const cadastro = document.getElementById("pageCad");
+
+  if (principal && cadastro) {
+    principal.classList.add("hidden");
+    cadastro.classList.remove("hidden");
+  }
+}
+
 // Seletores da localização
 const selEstado = document.getElementById("selectEstado");
 const selCidade = document.getElementById("selectCidade");
