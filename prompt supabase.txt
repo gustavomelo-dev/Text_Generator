@@ -1,0 +1,178 @@
+
+
+## 🎯 Objetivo do Projeto
+
+Criar um sistema **frontend** para geração de arquivos `.txt` de anúncios publicitários, com base em **modelos pré-definidos** contendo campos dinâmicos que são preenchidos com dados de uma estrutura relacional.
+
+### Campos Dinâmicos no Modelo
+
+* `{ DATA_VALID }`
+* `{ VEND_NUMBER }`
+* `{ VEND_NAME }`
+* `{ LOCALIDADE }`
+
+---
+
+## 📦 Estrutura Inicial (Offline)
+
+Como inicialmente não era possível utilizar banco de dados ou serviços externos, foi criada uma estrutura **em memória** no arquivo `dados.js`, simulando um banco de dados local. A estrutura seguiu um modelo relacional:
+
+### 🔗 Relacionamentos
+
+1. **Estado** → possui várias **Cidades**
+2. **Cidade** → pertence a um **Estado** e possui várias **Lojas**
+3. **Loja** → pertence a uma **Cidade** e possui vários **Vendedores**
+4. **Vendedor** → pertence a uma **Loja**
+
+### 📁 Exemplo do `dados.js`
+
+```js
+const dadosBrasil = {
+  estados: [
+    {
+      nome: "São Paulo",
+      cidades: [
+        {
+          nome: "São Paulo",
+          lojas: [
+            {
+              nome: "Loja Central",
+              cep: "32165-489",
+              bairro: "Telemaco",
+              rua: "Rua Exemplo",
+              numeroLoja: 681,
+              endereco: "Rua Exemplo, 681",
+              vendedores: [
+                {
+                  nome: "Juliana",
+                  numero: "11 99103-7658",
+                  email: "juliana.torres@tecar.com.br",
+                  cargo: "Consultor de Vendas"
+                },
+                {
+                  nome: "Pablo",
+                  numero: "11 99103-7658",
+                  email: "pablo.marchada@tecar.com.br",
+                  cargo: "Supervisor de Vendas"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+```
+
+---
+
+## 🌐 Migração para Supabase
+
+Com a possibilidade de usar a **Supabase**, a estrutura foi migrada para um banco de dados relacional real com suporte a API REST.
+
+### 🔧 Estrutura do Banco no Supabase
+
+```sql
+-- Estados
+CREATE TABLE estados (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL
+);
+
+-- Cidades
+CREATE TABLE cidades (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL,
+  estado_id INTEGER NOT NULL REFERENCES estados(id) ON DELETE CASCADE
+);
+
+-- Lojas
+CREATE TABLE lojas (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL,
+  cep TEXT,
+  bairro TEXT,
+  rua TEXT,
+  numero_loja INTEGER,
+  endereco TEXT,
+  cidade_id INTEGER NOT NULL REFERENCES cidades(id) ON DELETE CASCADE
+);
+
+-- Vendedores
+CREATE TABLE vendedores (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL,
+  numero TEXT,
+  email TEXT,
+  cargo TEXT,
+  loja_id INTEGER NOT NULL REFERENCES lojas(id) ON DELETE CASCADE
+);
+```
+
+### 🔑 Informações de Acesso
+
+* **API URL:** `https://cewpksxjcimadenhzsjq.supabase.co`
+* **Chave Pública (anon):**
+
+```plaintext
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+## 📂 Estrutura dos Arquivos do Projeto
+
+```
+/index.html
+  └─ script.js            // Geração de .txt
+  └─ scriptForm.js        // Coleta e envio dos dados
+/dados.js                 // Simulação antiga (será removida)
+```
+
+---
+
+## ✅ Próximos Passos
+
+### 1. Substituir a lógica do `dados.js`
+
+Você deve substituir todas as interações com a variável `dadosBrasil` por chamadas REST usando a API da Supabase. Você pode usar `fetch` ou a biblioteca oficial `@supabase/supabase-js`.
+
+### 2. Instalar SDK da Supabase (recomendado)
+
+Inclua no seu HTML:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+```
+
+### 3. Inicializar o cliente Supabase
+
+No início do seu `script.js` e `scriptForm.js`:
+
+```js
+const SUPABASE_URL = 'https://cewpksxjcimadenhzsjq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+```
+
+### 4. Exemplo de Consulta com Supabase
+
+```js
+const { data, error } = await supabase
+  .from('vendedores')
+  .select('*, loja_id(*, cidade_id(*, estado_id(*)))');
+```
+
+### 5. Atualizar a Interface HTML
+
+Dependendo de como os dados são usados, será necessário atualizar os `<select>`, `<input>` e a lógica de substituição dos placeholders nos arquivos `.txt`.
+
+---
+
+## 🛠️ Se você quiser ajuda com:
+
+* Como organizar o código com Supabase
+* Refatorar os scripts para consumir a API
+* Gerar o `.txt` com os dados dinâmicos
+* Popular dropdowns (estados, cidades, lojas, vendedores) dinamicamente
